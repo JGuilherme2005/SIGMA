@@ -1,0 +1,18 @@
+/* Importa o CSS do Leaflet para o mapa funcionar corretamente */
+@import "leaflet/dist/leaflet.css";
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #f0f2f5;
+}
+
+/* Garante que o container do mapa ocupe a tela toda */
+.leaflet-container {
+    width: 100%;
+    height: 100%;
+}

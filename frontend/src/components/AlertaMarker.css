@@ -1,0 +1,15 @@
+/* Estilos para o marcador e popup */
+.custom-div-icon { position: relative; }
+.marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; background: #007bff; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin-left: -15px; margin-top: -15px; }
+.marker-pin.marker-icon-crítica { background: #dc3545; }
+.marker-pin.marker-icon-alta { background: #fd7e14; }
+.marker-pin.marker-icon-média { background: #ffc107; }
+.marker-pin.marker-icon-baixa { background: #007bff; }
+.custom-div-icon .material-icons { position: absolute; top: 5px; left: 5px; color: white; font-size: 20px; }
+.popup-content h4 { margin: 0 0 10px 0; color: #1c2b4c; }
+.popup-content p { margin: 0 0 10px 0; }
+.popup-details { font-size: 0.9em; display: flex; flex-direction: column; gap: 5px; }
+.popup-details .prioridade-crítica { color: #dc3545; font-weight: bold; }
+.popup-details .prioridade-alta { color: #fd7e14; font-weight: bold; }
+.popup-details .prioridade-média { color: #ffc107; font-weight: bold; }
+.popup-details .prioridade-baixa { color: #007bff; font-weight: bold; }
