@@ -1,0 +1,101 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # 1. Banco de Dados PostgreSQL com extensão PostGIS
+  postgres:
+    image: postgis/postgis:13-3.1
+    container_name: sigma_postgres
+    environment:
+      - POSTGRES_USER=sigma
+      - POSTGRES_PASSWORD=sigma_password
+      - POSTGRES_DB=sigma_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sigma -d sigma_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Message Broker RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3.9-management-alpine
+    container_name: sigma_rabbitmq
+    ports:
+      - "5672:5672"   # Porta para comunicação das aplicações
+      - "15672:15672" # Porta para o painel de gerenciamento web
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 3. Serviço de IA Preditiva
+  ia_service:
+    build: ./ia_service
+    container_name: sigma_ia_service
+    ports:
+      - "8001:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+  
+  # 4. Orquestrador (Consome denúncias, chama IA, salva no DB, despacha)
+  orchestrator_service:
+    build: ./orchestrator_service
+    container_name: sigma_orchestrator
+    environment:
+      - DATABASE_URL=postgresql://sigma:sigma_password@postgres/sigma_db
+      - RABBITMQ_HOST=rabbitmq
+    command: python main.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      ia_service:
+        condition: service_started
+
+  # 5. Serviço de Despacho (NII)
+  nii_service:
+    build: ./nii_service
+    container_name: sigma_nii_service
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    command: python main.py
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # 6. Serviço de Auditoria (Blockchain)
+  audit_service:
+    build: ./audit_service
+    container_name: sigma_audit_service
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    command: python main.py
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # 7. API Gateway (Ponto de Entrada Público)
+  api_gateway:
+    build: ./api_gateway
+    container_name: sigma_api_gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://sigma:sigma_password@postgres/sigma_db
+      - RABBITMQ_HOST=rabbitmq
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      orchestrator_service:
+        condition: service_started
+      
+volumes:
+  postgres_data:
