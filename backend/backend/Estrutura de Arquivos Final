@@ -1,0 +1,14 @@
+SIGMA/
+├── backend/                  <-- Seu serviço de API de denúncias
+│   ├── __pycache__/
+│   ├── main.py               <-- VAMOS MODIFICAR ESTE
+│   ├── models.py
+│   └── requirements.txt      <-- VAMOS MODIFICAR ESTE
+│
+├── servico-ia/               <-- NOVO DIRETÓRIO PARA O SERVIÇO DE IA
+│   ├── consumer.py           <-- CÓDIGO DO CONSUMIDOR (ESCUTA O RABBITMQ)
+│   ├── Dockerfile            <-- DOCKERFILE PARA ESTE SERVIÇO
+│   └── requirements.txt      <-- DEPENDÊNCIAS DESTE SERVIÇO
+│
+├── docker-compose.yml        <-- JÁ ATUALIZADO
+└── ... (outros arquivos) 

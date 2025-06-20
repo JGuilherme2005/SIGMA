@@ -1,0 +1,63 @@
+# docker-compose.yml (versão final)
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:13-3.1
+    container_name: sigma_postgres
+    environment:
+      - POSTGRES_USER=sigma
+      - POSTGRES_PASSWORD=sigma_password
+      - POSTGRES_DB=sigma_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sigma_network
+
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: sigma_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - sigma_network
+
+  servico-denuncias:
+    build: ./backend
+    container_name: sigma_api_denuncias
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      - DATABASE_URL=postgresql://sigma:sigma_password@postgres:5432/sigma_db
+      - RABBITMQ_HOST=rabbitmq
+    networks:
+      - sigma_network
+      
+  # Microsserviço: Processador de IA (AGORA ATIVO)
+  servico-ia:
+    build: ./servico-ia # Aponta para a pasta do novo serviço
+    container_name: sigma_servico_ia
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://sigma:sigma_password@postgres:5432/sigma_db
+      - RABBITMQ_HOST=rabbitmq
+    networks:
+      - sigma_network
+
+volumes:
+  postgres_data:
+
+networks:
+  sigma_network:
+    driver: bridge

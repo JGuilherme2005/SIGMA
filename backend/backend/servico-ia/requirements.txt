@@ -1,0 +1,4 @@
+# servico-ia/requirements.txt
+pika
+sqlalchemy
+psycopg2-binary
